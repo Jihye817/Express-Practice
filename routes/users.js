@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const conn = require("../mariadb");
 const { body, validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+dotenv.config();
 
 router.use(express.json());
 
@@ -37,6 +40,17 @@ router.post(
       let loginUser = results[0];
 
       if (loginUser && loginUser.password == password) {
+        const token = jwt.sign(
+          { email: loginUser.email, name: loginUser.name },
+          process.env.PRIVATE_KEY,
+          {
+            expiresIn: "30m",
+            issuer: "jihye",
+          }
+        );
+
+        res.cookie("token", token, { httpOnly: true });
+
         res.status(200).json({
           message: `${loginUser.name}님 로그인을 환영합니다`,
         });
