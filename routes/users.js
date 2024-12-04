@@ -31,6 +31,10 @@ router.post("/join", (req, res) => {
       "INSERT INTO users (email, name, password, contact) VALUES (?, ?, ?, ?)";
     let values = [email, name, password, contact];
     conn.query(sql, values, function (err, results) {
+      if (err) {
+        console.log(err);
+        return res.status(400).end();
+      }
       res.status(201).json(results);
     });
   } else {
@@ -61,7 +65,15 @@ router
 
     let sql = "DELETE FROM users WHERE email = ?";
     conn.query(sql, email, function (err, results) {
-      res.status(200).json(results);
+      if (err) {
+        console.log(err);
+        return res.status(400).end();
+      }
+      if (results.affectedRows == 0) {
+        return res.status(400).end();
+      } else {
+        res.status(200).json(results);
+      }
     });
   });
 
